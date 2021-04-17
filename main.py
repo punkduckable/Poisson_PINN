@@ -1,7 +1,10 @@
 import torch;
 import numpy as np;
 from typing import Tuple;
-from Poisson_PINN import Neural_Network, f, Colocation_Loss, Boundary_Loss, PDE_Residual;
+import matplotlib.pyplot as plt;
+
+from Poisson_PINN import Neural_Network, f, Colocation_Loss, Boundary_Loss;
+from Plotter import Populate_Axes, Generate_Plot_Gridpoints;
 
 
 # Training Loop
@@ -181,7 +184,7 @@ def generate_points(num_Colocation_Points : int, num_Boundary_Points : int) -> T
 # main function!
 def main():
     # Specify hyperparameters
-    Epochs : int = 100;
+    Epochs : int = 10;
     Learning_Rate : float = .001;
 
     # Set up the neural network to approximate the PDE solution.
@@ -218,6 +221,16 @@ def main():
         print(("Colocation Loss = %7f" % Colocation_Losses[t]), end = '');
         print((", Boundary Loss = %7f" % Boundary_Losses[t]), end = '');
         print((", Total Loss = %7f" % (Colocation_Losses[t] + Boundary_Losses[t])));
+
+    # Set up figure and plotting gridpoints.
+    fig, Axes = plt.subplots(1,3);
+    Plotting_Points = Generate_Plot_Gridpoints(50);
+
+    # Generate and show the plot!
+    Populate_Axes(Axes, u_NN, Plotting_Points, 50);
+    plt.show();
+
+
 
 if __name__ == '__main__':
     main();

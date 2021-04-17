@@ -97,23 +97,6 @@ def f(x : float, y : float) -> torch.Tensor:
 
 
 
-# True solution to Poission's equation with the above driving term.
-def True_Solution(x : float, y : float) -> torch.Tensor:
-    """ Evaluates the true (known) solution to the PDE at a particular point.
-
-    ----------------------------------------------------------------------------
-    Arguments:
-    x : x-coordinate we want to evaluate the true solution at.
-    y : y-coordinate we want to evaluate the true solution at.
-
-    ----------------------------------------------------------------------------
-    Returns:
-    A scalar tensor containing the true solution at (x, y). """
-
-    return (np.sin(np.pi * x) * np.sin(np.pi * y));
-
-
-
 # Loss from enforcing the PDE at the colocation points.
 def Colocation_Loss(u_NN : Neural_Network, Colocation_Points : torch.Tensor) -> torch.Tensor:
     """ This function evaluates how well u_NN satisifies the PDE at the
@@ -227,75 +210,3 @@ def Boundary_Loss(u_NN : Neural_Network, Boundary_Points : torch.Tensor, c : flo
     # Divide the accmulated loss by the number of boundary points to get
     # the mean square boundary loss.
     return (Loss / num_Boundary_Points);
-
-
-
-# Residual function to determine how well the network satisifies the PDE.
-def PDE_Residual(u_NN : Neural_Network, points : torch.Tensor) -> np.array:
-    """ Let u_NN denote the approximate PDE solution created by the Neural
-    Network. This function computes (d^2 u_NN)/dx^2 + (d^2 u_NN)/dy^2 + f, which
-    we call the residual, at each element of points. If the NN perfectly
-    satisified the PDE, then the residual would be zero everywhere. However,
-    since the NN only approximates the PDE solution, we get non-zero residuals.
-
-    ----------------------------------------------------------------------------
-    Arguments:
-    u_NN : the Neural Network that approximates the PDE solution.
-
-    points : a tensor of coordinates of points where we want to evaluate the
-    residual This must be a N by 2 tensor, where N is the number of points. The
-    ith row of this tensor should contain the x,y coordinates of the ith point
-    where we want to evaluate the residual.
-
-    ----------------------------------------------------------------------------
-    Returns:
-    a numpy array. The ith element of this array gives the residual at the ith
-    element of points. """
-
-    # First, determine the number of points and intiailize the array.
-    num_points : int = points.shape[0];
-    Residual = np.empty((num_points), dtype = np.float);
-
-    for i in range(num_points):
-        # Get the xy coordinate of the ith point.
-        xy = points[i];
-
-        # we need to evalute the PDE, which means computing derivatives of
-        # the approximate solution with respect to x and y. Thus, xy requires
-        # a gradient.
-        xy.requires_grad_(True);
-
-        # Compute the neural network approximation of the solution at this
-        # point.
-        u = u_NN.forward(xy);
-
-        # Compute the gradient of u with respect to the input coordinates
-        # x and y. This will yield a 2 element tensor, whose first element
-        # is du/dx and whose second element is du/dy. We will need the
-        # graph used to compute grad_u when evaluating the second derivatives,
-        # so we set create_graph = True.
-        grad_u = torch.autograd.grad(u, xy, create_graph = True)[0];
-
-        # extract the partial derivatives
-        du_dx = grad_u[0];
-        du_dy = grad_u[1];
-
-        # Compute the gradient of du_dx and du_dy with respect to the input
-        # coordinates. The 0 component of grad_du_dx holds d^2u/dx^2 while
-        # the 1 component of grad_du_dy holds d^2u/dy^2. We need to keep the
-        # graph of grad_u to evaluate du_dy, so we set retain_graph to true
-        # when computing grad_du_dx. We don't plan to do any backpropigation,
-        # so we don't need to compute a new graph for the second gradients. We
-        # don't need the graph after computing the derivatives, so we
-        # set retain_graph = False in the second call (which will free the graphs
-        # for grad_u and u).
-        grad_du_dx = torch.autograd.grad(du_dx, xy, retain_graph = True)[0];
-        grad_du_dy = torch.autograd.grad(du_dy, xy)[0];
-        d2u_dx2 = grad_du_dx[0];
-        d2u_dy2 = grad_du_dy[1];
-
-        # Now, determine the residual and put it in the corresponding element of
-        # the residual array.
-        Residual[i] = (d2u_dx2 + d2u_dy2 + f(xy[0], xy[1])).item();
-
-    return Residual;
