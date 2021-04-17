@@ -12,18 +12,20 @@ class Neural_Network(torch.nn.Module):
                  output_dim : int        = 1):   # Number of components in the output
         # Note: we assume that num_hidden_layers, nodes_per_layer, input_dim,
         # and out_dim are positive integers.
-        assert (num_hidden_layers > 0 and
-                nodes_per_layer > 0 and
-                input_dim > 0 and
+        assert (num_hidden_layers > 0   and
+                nodes_per_layer > 0     and
+                input_dim > 0           and
                 output_dim > 0), "Neural_Network initialization arguments must be positive integers!"
 
         # Call the superclass initializer.
         super(Neural_Network, self).__init__();
 
-        # Define object attributes.
-        self.input_dim  = input_dim;
-        self.output_dim = output_dim;
-        self.Num_Layers = num_hidden_layers + 1;
+        # Define object attributes. Note that there is an optput layer in
+        # addition to the hidden layers (which is why Num_Layers is
+        # num_hidden_layers + 1)
+        self.input_dim : int  = input_dim;
+        self.output_dim : int = output_dim;
+        self.Num_Layers : int = num_hidden_layers + 1;
 
         # Define Layers ModuleList.
         self.Layers = torch.nn.ModuleList();
@@ -32,36 +34,29 @@ class Neural_Network(torch.nn.Module):
         # domain, which means that in_features = input_dim. Since this is a
         # hidden layer, however it must have nodes_per_layer output features.
         self.Layers.append(
-            torch.nn.Linear(
-                in_features  = input_dim,
-                out_features = nodes_per_layer,
-                bias = True
-            )
+            torch.nn.Linear(    in_features  = input_dim,
+                                out_features = nodes_per_layer,
+                                bias = True )
         );
 
         # Now append the rest of the hidden layers. Each of these layers maps
-        # within the same space, which means thatin_features = out_features.
+        # within the same space, which means that in_features = out_features.
+        # Note that we start at i = 1 because we already made the 1st
+        # hidden layer.
         for i in range(1, num_hidden_layers):
             self.Layers.append(
-                torch.nn.Linear(
-                    in_features  = nodes_per_layer,
-                    out_features = nodes_per_layer,
-                    bias = True
-                )
+                torch.nn.Linear(    in_features  = nodes_per_layer,
+                                    out_features = nodes_per_layer,
+                                    bias = True )
             );
 
         # Now, append the Output Layer, which has nodes_per_layer input
         # features, but only output_dim output features.
         self.Layers.append(
-            torch.nn.Linear(
-                in_features  = nodes_per_layer,
-                out_features = output_dim,
-                bias = True
-            )
+            torch.nn.Linear(    in_features  = nodes_per_layer,
+                                out_features = output_dim,
+                                bias = True )
         );
-
-        # Set the number of layers
-        self.Num_Layers = num_hidden_layers + 1;
 
         # Initialize the weight matricies in the network.
         for i in range(self.Num_Layers):
@@ -71,7 +66,7 @@ class Neural_Network(torch.nn.Module):
         self.Activation_Function = torch.nn.Tanh();
 
     def forward(self, x : torch.Tensor) -> torch.Tensor:
-        # Note: the input must be an input_dim-component tensor.
+        # Note: the input must be an input_dim dimensional (1d) tensor.
 
         # Pass x through the network's layers!
         for i in range(self.Num_Layers - 1):
@@ -81,10 +76,11 @@ class Neural_Network(torch.nn.Module):
         return self.Layers[self.Num_Layers - 1](x);
 
 
+
 # Driving term for Poission's equation
 def f(x : float, y : float) -> torch.Tensor:
-    """ Poission's equation is -(d^2u/dx^2 + d^2u/dy^2) = f, for some function f.
-    This function defines f.
+    """ Poission's equation is -(d^2u/dx^2 + d^2u/dy^2) = f, for some function
+    f. This function defines f.
 
     ----------------------------------------------------------------------------
     Arguments:
@@ -93,7 +89,7 @@ def f(x : float, y : float) -> torch.Tensor:
 
     ----------------------------------------------------------------------------
     Returns:
-    A scalar tensor containing f(x, y). """
+    A scalar (single element) tensor containing f(x, y). """
 
     return  (2 * (np.pi ** 2) *
             torch.sin(np.pi * x) *
@@ -114,7 +110,7 @@ def True_Solution(x : float, y : float) -> torch.Tensor:
     Returns:
     A scalar tensor containing the true solution at (x, y). """
 
-    return np.sin(np.pi * x) * np.sin(np.pi * y);
+    return (np.sin(np.pi * x) * np.sin(np.pi * y));
 
 
 
@@ -124,9 +120,10 @@ def Colocation_Loss(u_NN : Neural_Network, Colocation_Points : torch.Tensor) -> 
     colocation points. For brevity, let u = u_NN. At each colocation point,
     we compute the following:
                                 d^2u/dx^2 + d^2u/dy^2 + f
-    In theory, this should be zero (it would be if u satisified the PDE). We
-    compute the square of the quantity above. We return the mean of these
-    squared errors.
+    If u actually satisified the PDE, then this whould be zero everywhere.
+    However, it generally won't be. This function computes the square of the
+    quantity above at each Colocation point. We return the mean of these squared
+    errors.
 
     ----------------------------------------------------------------------------
     Arguments:
@@ -187,16 +184,16 @@ def Colocation_Loss(u_NN : Neural_Network, Colocation_Points : torch.Tensor) -> 
 
     # Divide the accmulated loss by the number of colocation points to get
     # the mean square colocation loss.
-    return Loss / num_Colocation_Points;
+    return (Loss / num_Colocation_Points);
 
 
 
 # Boundary loss
-def Boundary_Loss(u_NN: Neural_Network, Boundary_Points : torch.Tensor, c : float) -> torch.Tensor:
-    """ This function imposes the Dirichlet boundary condition u = c. S
-    Specifically, for each boundary point, it computes the square of the
-    difference between u and c (the imposed BC). We return the mean of these
-    squared errors.
+def Boundary_Loss(u_NN : Neural_Network, Boundary_Points : torch.Tensor, c : float) -> torch.Tensor:
+    """ This function imposes the Dirichlet boundary condition u = c.
+    Specifically, for each boundary point (x,y), it computes the square of the
+    difference between u(x,y) and c (the imposed BC). We return the mean of
+    these squared errors.
 
     ----------------------------------------------------------------------------
     Arguments:
@@ -229,7 +226,7 @@ def Boundary_Loss(u_NN: Neural_Network, Boundary_Points : torch.Tensor, c : floa
 
     # Divide the accmulated loss by the number of boundary points to get
     # the mean square boundary loss.
-    return Loss / num_Boundary_Points;
+    return (Loss / num_Boundary_Points);
 
 
 
