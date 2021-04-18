@@ -211,7 +211,7 @@ def Setup_Axes() -> Tuple[plt.figure, np.array]:
     a numpy array of axes objects (to be passed to Update_Axes). """
 
     # Set up the figure object.
-    fig = plt.figure(figsize = (10, 4));
+    fig = plt.figure(figsize = (12, 4));
 
     # Approx solution subplot.
     Axes1 = fig.add_subplot(1, 3, 1);
@@ -230,11 +230,14 @@ def Setup_Axes() -> Tuple[plt.figure, np.array]:
 
     # Set settings that are the same for each Axes object.
     # The domain of each Axes object is the unit (2) square, and it's aspect
-    # ratio should be equal. I set these paramaters in a loop so that I only
+    # ratio should be equal. I set these parameters in a loop so that I only
     # have to type them once, thereby improving code maintainability.
     for i in range(3):
+        # Set x, y bounds
         Axes[i].set_xbound(0., 1.);
         Axes[i].set_ybound(0., 1.);
+
+        # Force python to produce a square plot.
         Axes[i].set_aspect('equal', adjustable = 'datalim');
         Axes[i].set_box_aspect(1.);
 
@@ -244,12 +247,15 @@ def Setup_Axes() -> Tuple[plt.figure, np.array]:
 
 
 # The plotting function!
-def Update_Axes(Axes : np.ndarray, u_NN : Neural_Network, Points : torch.Tensor, n : int) -> None:
+def Update_Axes(fig : plt.figure, Axes : np.ndarray, u_NN : Neural_Network, Points : torch.Tensor, n : int) -> None:
     """ This function plots the approximate solution and residual at the
     specified points.
 
     ----------------------------------------------------------------------------
     Arguments:
+    fig : The figure object to which the Axes belong. We need this to set up
+    the color bars.
+
     Axes : The array of Axes object that we will plot on. Note that this
     function will overwrite these axes.
 
@@ -281,11 +287,18 @@ def Update_Axes(Axes : np.ndarray, u_NN : Neural_Network, Points : torch.Tensor,
     x = Points[:, 0].numpy().reshape(n,n);
     y = Points[:, 1].numpy().reshape(n,n);
 
-    # Plot the approximate solution
-    Axes[0].contourf(x, y, u_NN_at_Points.reshape(n,n), levels = 50, cmap = plt.cm.jet);
+    # Plot the approximate solution + colorbar.
+    ColorMap0 = Axes[0].contourf(x, y, u_NN_at_Points.reshape(n,n), levels = 50, cmap = plt.cm.jet);
+    fig.colorbar(ColorMap0, ax = Axes[0], fraction=0.046, pad=0.04, orientation='vertical');
 
-    # Plot the true solution
-    Axes[1].contourf(x, y, True_Sol_at_Points.reshape(n,n), levels = 50, cmap = plt.cm.jet);
+    # Plot the true solution + colorbar
+    ColorMap1 = Axes[1].contourf(x, y, True_Sol_at_Points.reshape(n,n), levels = 50, cmap = plt.cm.jet);
+    fig.colorbar(ColorMap1, ax = Axes[1], fraction=0.046, pad=0.04, orientation='vertical');
 
-    # Plot the residual
-    Axes[2].contourf(x, y, Residual_at_Points.reshape(n,n), levels = 50, cmap = plt.cm.jet);
+    # Plot the residual + colorbar
+    ColorMap2 = Axes[2].contourf(x, y, Residual_at_Points.reshape(n,n), levels = 50, cmap = plt.cm.jet);
+    fig.colorbar(ColorMap2, ax = Axes[2], fraction=0.046, pad=0.04, orientation='vertical');
+
+    # Set tight layout (to prevent overlapping... I have no idea why this isn't
+    # a default setting. Matplotlib, you are special kind of awful). 
+    fig.tight_layout();

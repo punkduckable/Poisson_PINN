@@ -184,7 +184,7 @@ def generate_points(num_Colocation_Points : int, num_Boundary_Points : int) -> T
 # main function!
 def main():
     # Specify hyperparameters
-    Epochs : int = 10;
+    Epochs : int = 100;
     Learning_Rate : float = .001;
 
     # Set up the neural network to approximate the PDE solution.
@@ -229,8 +229,11 @@ def main():
         print((", Total Loss = %7f" % (Colocation_Losses[t] + Boundary_Losses[t])));
 
     # Plot final results.
-    Update_Axes(Axes, u_NN, Plotting_Points, 50);
+    Update_Axes(fig, Axes, u_NN, Plotting_Points, 50);
     plt.show();
+
+    # Save the network parameters!
+    torch.save(u_NN.state_dict(), "./Network_State_Dict");
 
 
 
