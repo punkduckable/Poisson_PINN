@@ -2,10 +2,9 @@ import torch;
 import numpy as np;
 from typing import Tuple;
 import matplotlib.pyplot as plt;
-from mpl_toolkits import mplot3d
 
 from Poisson_PINN import Neural_Network, f, Colocation_Loss, Boundary_Loss;
-from Plotter import Populate_Axes, Generate_Plot_Gridpoints;
+from Plotter import Update_Axes, Generate_Plot_Gridpoints, Setup_Axes;
 
 
 # Training Loop
@@ -185,7 +184,7 @@ def generate_points(num_Colocation_Points : int, num_Boundary_Points : int) -> T
 # main function!
 def main():
     # Specify hyperparameters
-    Epochs : int = 1;
+    Epochs : int = 10;
     Learning_Rate : float = .001;
 
     # Set up the neural network to approximate the PDE solution.
@@ -205,6 +204,12 @@ def main():
     Colocation_Losses = np.empty((Epochs), dtype = np.float);
     Boundary_Losses   = np.empty((Epochs), dtype = np.float);
 
+    # Set up figure and Axes.
+    fig, Axes = Setup_Axes();
+
+    # Set up plotting gridpoints.
+    Plotting_Points = Generate_Plot_Gridpoints(50);
+
     # Loop through the epochs.
     for t in range(Epochs):
         # Run training, testing for this epoch. Log the losses
@@ -223,15 +228,8 @@ def main():
         print((", Boundary Loss = %7f" % Boundary_Losses[t]), end = '');
         print((", Total Loss = %7f" % (Colocation_Losses[t] + Boundary_Losses[t])));
 
-    # Set up figure and plotting gridpoints.
-    fig = plt.figure();
-    Axes1 = fig.add_subplot(1, 3, 1, projection = '3d');
-    Axes2 = fig.add_subplot(1, 3, 2, projection = '3d');
-    Axes3 = fig.add_subplot(1, 3, 3, projection = '3d');
-    Plotting_Points = Generate_Plot_Gridpoints(50);
-
-    # Generate and show the plot!
-    Populate_Axes(np.array([Axes1, Axes2, Axes3]), u_NN, Plotting_Points, 50);
+    # Plot final results.
+    Update_Axes(Axes, u_NN, Plotting_Points, 50);
     plt.show();
 
 

@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt;
 import torch;
 import numpy as np;
+from typing import Tuple;
+
 from Poisson_PINN import Neural_Network, f;
 
 
@@ -193,8 +195,56 @@ def Generate_Plot_Gridpoints(n : int) -> torch.Tensor:
 
 
 
+# Set up Axes objects for plotting
+def Setup_Axes() -> Tuple[plt.figure, np.array]:
+    """ This function sets up the figure, axes objects for plotting. There
+    are a lot of settings to tweak, so I thought the code would be cleaner
+    if those details were outsourced to this function.
+
+    ----------------------------------------------------------------------------
+    Arguments:
+    None!
+
+    ----------------------------------------------------------------------------
+    Returns:
+    A tuple. The first element contains the figure object, the second contains
+    a numpy array of axes objects (to be passed to Update_Axes). """
+
+    # Set up the figure object.
+    fig = plt.figure(figsize = (10, 4));
+
+    # Approx solution subplot.
+    Axes1 = fig.add_subplot(1, 3, 1);
+    Axes1.set_title("Neural Network Approximation");
+
+    # True solution subplot
+    Axes2 = fig.add_subplot(1, 3, 2);
+    Axes2.set_title("True Solution");
+
+    # Residual subplot.
+    Axes3 = fig.add_subplot(1, 3, 3);
+    Axes3.set_title("PDE Residual");
+
+    # Package axes objects into an array.
+    Axes = np.array([Axes1, Axes2, Axes3]);
+
+    # Set settings that are the same for each Axes object.
+    # The domain of each Axes object is the unit (2) square, and it's aspect
+    # ratio should be equal. I set these paramaters in a loop so that I only
+    # have to type them once, thereby improving code maintainability.
+    for i in range(3):
+        Axes[i].set_xbound(0., 1.);
+        Axes[i].set_ybound(0., 1.);
+        Axes[i].set_aspect('equal', adjustable = 'datalim');
+        Axes[i].set_box_aspect(1.);
+
+    # All done!
+    return (fig, Axes);
+
+
+
 # The plotting function!
-def Populate_Axes(Axes : np.ndarray, u_NN : Neural_Network, Points : torch.Tensor, n : int) -> None:
+def Update_Axes(Axes : np.ndarray, u_NN : Neural_Network, Points : torch.Tensor, n : int) -> None:
     """ This function plots the approximate solution and residual at the
     specified points.
 
@@ -232,13 +282,10 @@ def Populate_Axes(Axes : np.ndarray, u_NN : Neural_Network, Points : torch.Tenso
     y = Points[:, 1].numpy().reshape(n,n);
 
     # Plot the approximate solution
-    Axes[0].plot_surface(x, y, u_NN_at_Points.reshape(n,n), cmap = plt.cm.jet);
-    Axes[0].set_title("Neural Network Approximation");
+    Axes[0].contourf(x, y, u_NN_at_Points.reshape(n,n), levels = 50, cmap = plt.cm.jet);
 
     # Plot the true solution
-    Axes[1].plot_surface(x, y, True_Sol_at_Points.reshape(n,n), cmap = plt.cm.jet);
-    Axes[1].set_title("True Solution");
+    Axes[1].contourf(x, y, True_Sol_at_Points.reshape(n,n), levels = 50, cmap = plt.cm.jet);
 
     # Plot the residual
-    Axes[2].plot_surface(x, y, Residual_at_Points.reshape(n,n), cmap = plt.cm.jet);
-    Axes[2].set_title("PDE Residual");
+    Axes[2].contourf(x, y, Residual_at_Points.reshape(n,n), levels = 50, cmap = plt.cm.jet);
