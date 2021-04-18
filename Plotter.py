@@ -232,16 +232,13 @@ def Populate_Axes(Axes : np.ndarray, u_NN : Neural_Network, Points : torch.Tenso
     y = Points[:, 1].numpy().reshape(n,n);
 
     # Plot the approximate solution
-    Axes[0].contour(x, y, u_NN_at_Points.reshape(n,n), levels = 50, cmap = plt.cm.jet);
-    Axes[0].axis('equal');
+    Axes[0].plot_surface(x, y, u_NN_at_Points.reshape(n,n), cmap = plt.cm.jet);
     Axes[0].set_title("Neural Network Approximation");
 
     # Plot the true solution
-    Axes[1].contour(x, y, True_Sol_at_Points.reshape(n,n), levels = 50, cmap = plt.cm.jet);
-    Axes[1].axis('equal');
+    Axes[1].plot_surface(x, y, True_Sol_at_Points.reshape(n,n), cmap = plt.cm.jet);
     Axes[1].set_title("True Solution");
 
     # Plot the residual
-    Axes[2].contour(x, y, Residual_at_Points.reshape(n,n), levels = 50, cmap = plt.cm.jet);
-    Axes[2].axis('equal');
+    Axes[2].plot_surface(x, y, Residual_at_Points.reshape(n,n), cmap = plt.cm.jet);
     Axes[2].set_title("PDE Residual");
