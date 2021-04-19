@@ -7,6 +7,7 @@ from Poisson_PINN import Neural_Network, f, Colocation_Loss, Boundary_Loss;
 from Plotter import Update_Axes, Generate_Plot_Gridpoints, Setup_Axes;
 
 
+
 # Training Loop
 def Training_Loop(  u_NN : Neural_Network,
                     Colocation_Points : torch.Tensor,
@@ -37,7 +38,6 @@ def Training_Loop(  u_NN : Neural_Network,
     returns:
     Nothing! """
 
-    # First, determine the number of Colocation and Boundary points.
     num_Colocation_Points : int = Colocation_Points.shape[0];
     num_Boundary_Points : int   = Boundary_Points.shape[0];
 
@@ -52,7 +52,7 @@ def Training_Loop(  u_NN : Neural_Network,
     # weights.
     Loss.backward();
 
-    # update network weights using optimizer.
+    # update network weights.
     Optimizer.step();
 
 
@@ -176,7 +176,6 @@ def generate_points(num_Colocation_Points : int, num_Boundary_Points : int) -> T
                                  Boundary_Corners),
                                  dim = 0);
 
-    # all done!
     return (Colocation_Points, Boundary_Points);
 
 

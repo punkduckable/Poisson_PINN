@@ -58,7 +58,7 @@ class Neural_Network(torch.nn.Module):
                                 bias = True )
         );
 
-        # Initialize the weight matricies in the network.
+        # Initialize the weight matricies, bias vectors in the network.
         for i in range(self.Num_Layers):
             torch.nn.init.xavier_uniform_(self.Layers[i].weight);
 
@@ -72,7 +72,8 @@ class Neural_Network(torch.nn.Module):
         for i in range(self.Num_Layers - 1):
             x = self.Activation_Function(self.Layers[i](x));
 
-        # Pass through the last layer and return (no activation function)
+        # Pass through the last layer and return (there is no activation
+        # function in the last layer)
         return self.Layers[self.Num_Layers - 1](x);
 
 
@@ -120,7 +121,6 @@ def Colocation_Loss(u_NN : Neural_Network, Colocation_Points : torch.Tensor) -> 
     Returns:
     Mean Square Error at the colocation points. """
 
-    # First, determine number of colocation points (rows of this arg)
     num_Colocation_Points : int = Colocation_Points.shape[0];
 
     # Now, initialize the loss and loop through the colocation points!
@@ -164,7 +164,6 @@ def Colocation_Loss(u_NN : Neural_Network, Colocation_Points : torch.Tensor) -> 
         # Now evaluate the driving term of the PDE at the current point.
         Loss += (d2u_dx2 + d2u_dy2 + f(xy[0], xy[1])) ** 2;
 
-
     # Divide the accmulated loss by the number of colocation points to get
     # the mean square colocation loss.
     return (Loss / num_Colocation_Points);
@@ -192,7 +191,6 @@ def Boundary_Loss(u_NN : Neural_Network, Boundary_Points : torch.Tensor, c : flo
     Returns:
     Mean Square Error at the boundary points. """
 
-    # First, determine the number of boundary points.
     num_Boundary_Points : int = Boundary_Points.shape[0];
 
     # Now, initialize the Loss and loop through the Boundary Points.

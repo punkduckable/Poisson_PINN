@@ -75,7 +75,7 @@ def PDE_Residual(u_NN : Neural_Network, Points : torch.Tensor) -> np.array:
         # is du/dx and whose second element is du/dy. We will need the
         # graph used to compute grad_u when evaluating the second derivatives,
         # so we set create_graph = True.
-        grad_u = torch.autograd.grad(u, xy, create_graph = True)[0];
+        grad_u = torch.autograd.grad(u, xy, retain_graph = True, create_graph = True)[0];
 
         # extract the partial derivatives
         du_dx = grad_u[0];
@@ -166,7 +166,9 @@ def Evaluate_True_Solution(Points : torch.Tensor) -> np.array:
 # Generate plotting gridpoints.
 def Generate_Plot_Gridpoints(n : int) -> torch.Tensor:
     """ This function generates a uniformly spaced grid of points in [0,1]x[0,1]
-    for plotting purposes.
+    for plotting purposes. Sure, you could do this with meshgrid, but I prefer
+    to write my own code, especially if it won't impact performance by much
+    (the code should only call this function once). I like explicit code.
 
     ----------------------------------------------------------------------------
     Arguments:
@@ -179,17 +181,17 @@ def Generate_Plot_Gridpoints(n : int) -> torch.Tensor:
 
     an n^2 x 2 tensor of points. The ith row of this tensor holds the x,y
     coordinates of the ith point. The zero element has coordinates (0,0),
-    the 1 element has coordinates (1/(n - 1), 0)... the n element has coordinates
-    (0, 1/(n - 1))... the n*n - 1 element has coordinates (1, 1). """
+    the 1 element has coordinates (0, 1/(n - 1))... the n element has coordinates
+    (1/(n - 1), 0)... the n*n - 1 element has coordinates (1, 1). """
 
     Points = torch.empty((n*n, 2), dtype = torch.float);
 
-    # Loop through the points. Yes, this looks just like how you'd do this in
-    # C. I'm a C programmer.
+    # Using the rule defined above, we can see that the i*n + j element of
+    # Points should have coordinates j/(n - 1), i/(n - 1). (think about it)
     for i in range(n):
         for j in range(n):
-            Points[n*i + j, 0] = j/(n - 1);
-            Points[n*i + j, 1] = i/(n - 1);
+            Points[n*i + j, 0] = i/(n - 1);
+            Points[n*i + j, 1] = j/(n - 1);
 
     return Points;
 
@@ -241,7 +243,6 @@ def Setup_Axes() -> Tuple[plt.figure, np.array]:
         Axes[i].set_aspect('equal', adjustable = 'datalim');
         Axes[i].set_box_aspect(1.);
 
-    # All done!
     return (fig, Axes);
 
 
@@ -263,8 +264,8 @@ def Update_Axes(fig : plt.figure, Axes : np.ndarray, u_NN : Neural_Network, Poin
     equation.
 
     Points : The set of points we want to evaluate the approximate and true
-    solutions, as well as the PDE Residual. This should be an Nx2 tensor, whose
-    ith row holds the x,y coordinates of the ith point we want to evaluate at.
+    solutions, as well as the PDE Residual. This should be an (n*n)x2 tensor,
+    whose ith row holds the x,y coordinates of the ith point we want to plot.
     Each element of Points should be an element of [0,1]x[0,1].
 
     n : the number of gridpoints along each axis. Points should be an n*n x 2
@@ -300,5 +301,5 @@ def Update_Axes(fig : plt.figure, Axes : np.ndarray, u_NN : Neural_Network, Poin
     fig.colorbar(ColorMap2, ax = Axes[2], fraction=0.046, pad=0.04, orientation='vertical');
 
     # Set tight layout (to prevent overlapping... I have no idea why this isn't
-    # a default setting. Matplotlib, you are special kind of awful). 
+    # a default setting. Matplotlib, you are special kind of awful).
     fig.tight_layout();
