@@ -11,7 +11,26 @@ class Setup_Data_Container:
 
 
 def Index_After_Phrase(Line_In : str, Phrase_In : str, Case_Sensitive : bool = False) -> int:
-    """ This is a placeholder description. Please fill me in"""
+    """ This function searches for Phrase_In within Line_In. If found, it
+    returns the index of the first character in Line_In after the first instance
+    of Phrase_In within Line_In.
+
+    ----------------------------------------------------------------------------
+    Arguments:
+    Line_In : A string that contains the line of text. The program searches for
+    Phrase_In within Line_In.
+
+    Phrase_In : A string containing the phrase we're searching for.
+
+    Case_Sensitive : Controls if the search is case sensitive or not. (see
+    Read_Line_After's doc string for more detials).
+
+    ----------------------------------------------------------------------------
+    Returns:
+    If we can find Phrase_In within Line_In, then this returns the index of the
+    first character in Line_In after the first instance of Phrase_In within
+    Line_In. If we can't find Phrase_In within Line_In, then this function
+    returns -1. """
 
     # First, get the number of characters in Line, Phrase. We will use these as
     # loop bounds.
@@ -57,7 +76,28 @@ def Index_After_Phrase(Line_In : str, Phrase_In : str, Case_Sensitive : bool = F
 
 
 def Read_Line_After(File, Phrase : str, Case_Sensitive = False) -> str:
-    """ This is a placeholder description. Please fill me in"""
+    """ This function tries to find Phrase in a line of File. In particular,
+    it searches through the lines of File until it finds an instance of Phrase.
+    When it finds Phrase in one of File's lines, it returns everything after
+    the Phrase in that line. If it can't find the Phase in one of File's lines,
+    it raises an exception.
+
+    ----------------------------------------------------------------------------
+    Arguments:
+    File : The file in which we want to search for Phrase.
+
+    Phrase : The Phrase we want to find.
+
+    Case_Sensitive : Controls if the search is case sensitive or not. If
+    True, then we search for an exact match (including case) of Phrase in one of
+    File's lines. If not, then we try to find a line of File which contains the
+    same letters (in the same order) as Phrase.
+
+    ----------------------------------------------------------------------------
+    Returns:
+    Everything after Phrase in the first line of File that contains Phrase.
+    Thus, if the Phrase is "cat is", and one of File's lines is "the cat is fat"
+    , then this will return " fat". """
 
     # Cycle through the lines of the file until we find one that matches
     # the phrase.
@@ -89,7 +129,16 @@ def Read_Line_After(File, Phrase : str, Case_Sensitive = False) -> str:
 
 
 def Setup_File_Reader() -> Setup_Data_Container:
-    """ This is a placeholder description. Please fill me in"""
+    """ This function reads the settings in Setup.txt.
+
+    ----------------------------------------------------------------------------
+    Arguments:
+    None!
+
+    ----------------------------------------------------------------------------
+    Returns:
+    A Setup_Data_Container object which contains all of the setings read in
+    from Setup.txt. The main function uses these to set up the program. """
 
     # Open file, initialze a Setup_Data object.
     File = open("./Setup.txt", "r");
