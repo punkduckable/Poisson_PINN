@@ -46,7 +46,7 @@ Learning Rate [float] :                          .001
 ################################################################################
 # Training, Testing parameters
 
-Number of Training Colocation Points [int] :     500
+Number of Training Collocation Points [int] :     500
 Number of Training Boundary Points [int] :       400
-Number of Testing Colocation Points [int] :      100
+Number of Testing Collocation Points [int] :      100
 Number of Testing Boundary Points [int] :        80

@@ -98,40 +98,40 @@ def f(x : float, y : float) -> torch.Tensor:
 
 
 
-# Loss from enforcing the PDE at the colocation points.
-def Colocation_Loss(u_NN : Neural_Network, Colocation_Points : torch.Tensor) -> torch.Tensor:
+# Loss from enforcing the PDE at the collocation points.
+def Collocation_Loss(u_NN : Neural_Network, Collocation_Points : torch.Tensor) -> torch.Tensor:
     """ This function evaluates how well u_NN satisifies the PDE at the
-    colocation points. For brevity, let u = u_NN. At each colocation point,
+    collocation points. For brevity, let u = u_NN. At each collocation point,
     we compute the following:
                                 d^2u/dx^2 + d^2u/dy^2 + f
     If u actually satisified the PDE, then this whould be zero everywhere.
     However, it generally won't be. This function computes the square of the
-    quantity above at each Colocation point. We return the mean of these squared
+    quantity above at each Collocation point. We return the mean of these squared
     errors.
 
     ----------------------------------------------------------------------------
     Arguments:
     u_NN : The neural network that approximates the solution.
 
-    colocation_points : a tensor of coordinates of the colocation points. If
-    there are N colocation points, then this should be a N x 2 tensor, whose ith
-    row holds the coordinates of the ith colocation point.
+    collocation_points : a tensor of coordinates of the collocation points. If
+    there are N collocation points, then this should be a N x 2 tensor, whose ith
+    row holds the coordinates of the ith collocation point.
 
     ----------------------------------------------------------------------------
     Returns:
-    Mean Square Error at the colocation points. """
+    Mean Square Error at the collocation points. """
 
-    num_Colocation_Points : int = Colocation_Points.shape[0];
+    num_Collocation_Points : int = Collocation_Points.shape[0];
 
-    # Now, initialize the loss and loop through the colocation points!
+    # Now, initialize the loss and loop through the collocation points!
     Loss = torch.zeros(1, dtype = torch.float);
-    for i in range(num_Colocation_Points):
-        xy = Colocation_Points[i];
+    for i in range(num_Collocation_Points):
+        xy = Collocation_Points[i];
 
         # We need to compute the gradeint of u with respect to the xy coordinates.
         xy.requires_grad_(True);
 
-        # Calculate approximate solution at this colocation point.
+        # Calculate approximate solution at this collocation point.
         u = u_NN.forward(xy);
 
         # Compute gradient of u with respect to xy. We have to create the graph
@@ -164,9 +164,9 @@ def Colocation_Loss(u_NN : Neural_Network, Colocation_Points : torch.Tensor) -> 
         # Now evaluate the driving term of the PDE at the current point.
         Loss += (d2u_dx2 + d2u_dy2 + f(xy[0], xy[1])) ** 2;
 
-    # Divide the accmulated loss by the number of colocation points to get
-    # the mean square colocation loss.
-    return (Loss / num_Colocation_Points);
+    # Divide the accmulated loss by the number of collocation points to get
+    # the mean square collocation loss.
+    return (Loss / num_Collocation_Points);
 
 
 
@@ -181,7 +181,7 @@ def Boundary_Loss(u_NN : Neural_Network, Boundary_Points : torch.Tensor, c : flo
     Arguments:
     u_NN : The neural network that approximates the solution.
 
-    Boundary_Points : a tensor of coordinates of the colocation points. If
+    Boundary_Points : a tensor of coordinates of the collocation points. If
     there are N boundary points, then this should be a N x 2 tensor, whose ith
     row holds the coordinates of the ith boundary point.
 

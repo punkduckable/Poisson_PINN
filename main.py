@@ -3,7 +3,7 @@ import numpy as np;
 from typing import Tuple;
 import matplotlib.pyplot as plt;
 
-from Poisson_PINN import Neural_Network, f, Colocation_Loss, Boundary_Loss;
+from Poisson_PINN import Neural_Network, f, Collocation_Loss, Boundary_Loss;
 from Plotter import Update_Axes, Generate_Plot_Gridpoints, Setup_Axes;
 from Setup_File_Reader import Setup_File_Reader, Setup_Data_Container;
 
@@ -11,22 +11,22 @@ from Setup_File_Reader import Setup_File_Reader, Setup_Data_Container;
 
 # Training Loop
 def Training_Loop(  u_NN : Neural_Network,
-                    Colocation_Points : torch.Tensor,
+                    Collocation_Points : torch.Tensor,
                     Boundary_Points : torch.Tensor,
                     Optimizer : torch.optim.Optimizer) -> None:
     """ This loop runs one epoch of training for the neural network. In
-    particular, we enforce the PDE at the specified Colocation_Points, and the
+    particular, we enforce the PDE at the specified Collocation_Points, and the
     boundary conditions at the Boundary_Points.
 
     ----------------------------------------------------------------------------
     Arguments:
     net : The neural network that is approximating the solution to the PDE.
 
-    Colocation_Points : the colocation points at which we want to enforce the
+    Collocation_Points : the collocation points at which we want to enforce the
     PDE. These should be on the interior of the domain. Futher, these should be
     DISTINCT from the points we test the network at. This should be an Nx2
-    tensor of floats, where N is the number of colocation points. The ith
-    row of this tensor should be the coordinates of the ith colocation point.
+    tensor of floats, where N is the number of collocation points. The ith
+    row of this tensor should be the coordinates of the ith collocation point.
 
     Boundary_Points : The points on the boundary at which we want to enforce the
     boundary conditions. This should be a Bx2 tensor of floats, where B is
@@ -39,14 +39,14 @@ def Training_Loop(  u_NN : Neural_Network,
     returns:
     Nothing! """
 
-    num_Colocation_Points : int = Colocation_Points.shape[0];
+    num_Collocation_Points : int = Collocation_Points.shape[0];
     num_Boundary_Points : int   = Boundary_Points.shape[0];
 
     # Zero out the gradients in the neural network.
     Optimizer.zero_grad();
 
     # Evaluate the Loss (Note, we enforce a BC of 0)
-    Loss = (Colocation_Loss(u_NN, Colocation_Points) +
+    Loss = (Collocation_Loss(u_NN, Collocation_Points) +
             Boundary_Loss(u_NN, Boundary_Points, 0));
 
     # Back-propigate to compute gradients of Loss with respect to network
@@ -60,10 +60,10 @@ def Training_Loop(  u_NN : Neural_Network,
 
 # Testing Loop
 def Testing_Loop(   u_NN : Neural_Network,
-                    Colocation_Points : torch.Tensor,
+                    Collocation_Points : torch.Tensor,
                     Boundary_Points : torch.Tensor) -> Tuple[float, float]:
     """ This loop tests the neural network at the specified Boundary and
-    Colocation points. You CAN NOT run this funcetion with no_grad set True.
+    Collocation points. You CAN NOT run this funcetion with no_grad set True.
     Why? Because we need to evaluate derivatives of the solution with respect
     to the inputs! This is a PINN, afterall. This means that we need torch to
     build a computa1tional graph.
@@ -78,12 +78,12 @@ def Testing_Loop(   u_NN : Neural_Network,
     Arguments:
     net : The neural network that is approximating the solution to the PDE.
 
-    Colocation_Points : the colocation points at which we want to enforce the
+    Collocation_Points : the collocation points at which we want to enforce the
     PDE. These should be on the interior of the domain. Futher, these should be
-    DISTINCT from the colocation points that we use in the training loop.
-    This should be an Nx2 tensor of floats, where N is the number of colocation
+    DISTINCT from the collocation points that we use in the training loop.
+    This should be an Nx2 tensor of floats, where N is the number of collocation
     points. The ith row of this tensor should be the coordinates of the ith
-    colocation point.
+    collocation point.
 
     Boundary_Points : The points on the boundary at which we want to enforce the
     boundary conditions. These should be DISTINCT from the boundary points we
@@ -93,11 +93,11 @@ def Testing_Loop(   u_NN : Neural_Network,
 
     ----------------------------------------------------------------------------
     Returns:
-    a tuple of floats. The first element holds the colocation loss, while
+    a tuple of floats. The first element holds the collocation loss, while
     the second holds the boundary loss. """
 
-    # Get the losses at the passed colocation points (Note we enforce a 0 BC)
-    Coloc_Loss : float = Colocation_Loss(u_NN, Colocation_Points).item();
+    # Get the losses at the passed collocation points (Note we enforce a 0 BC)
+    Coloc_Loss : float = Collocation_Loss(u_NN, Collocation_Points).item();
     Bound_Loss : float = Boundary_Loss(u_NN, Boundary_Points, 0).item();
 
     # Return the losses.
@@ -108,7 +108,7 @@ def Testing_Loop(   u_NN : Neural_Network,
     # Cmputing the losses requires propigating the inputs through the network,
     # thereby building up a computational graph (we need to keep the graph
     # building enabled b/c we have to evaluate derivatives to compute the
-    # colocation loss). Normally, these graphs are freed when we call backward.
+    # collocation loss). Normally, these graphs are freed when we call backward.
     # That's what happens in the training loop. Here, we don't use backward.
     # The graphs will be freed, however. This function builds up graphs for
     # Coloc_Loss and Bound_Loss. When this function returns, however, both
@@ -117,14 +117,14 @@ def Testing_Loop(   u_NN : Neural_Network,
 
 
 
-# Generate colocation and boundary points
-def generate_points(num_Colocation_Points : int, num_Boundary_Points : int) -> Tuple[torch.Tensor, torch.Tensor]:
-    """ Generates colocation and boundary points within the unit square. All
+# Generate collocation and boundary points
+def generate_points(num_Collocation_Points : int, num_Boundary_Points : int) -> Tuple[torch.Tensor, torch.Tensor]:
+    """ Generates collocation and boundary points within the unit square. All
     points are generated with random coordinates
 
     ----------------------------------------------------------------------------
     Arguments:
-    num_Colocation_Points : The number of colocation points (within the domain)
+    num_Collocation_Points : The number of collocation points (within the domain)
     we should generate.
 
     num_Boundary_Points : Number of Boundary points we should generate. Thus
@@ -132,15 +132,15 @@ def generate_points(num_Colocation_Points : int, num_Boundary_Points : int) -> T
 
     ----------------------------------------------------------------------------
     Returns:
-    A tuple of tensors. The first element is a (num_Colocation_Points)x2 tensor
-    whose ith row holds the coordinates of the ith colocation point. The second
+    A tuple of tensors. The first element is a (num_Collocation_Points)x2 tensor
+    whose ith row holds the coordinates of the ith collocation point. The second
     element is a (num_Boundary_Points)x2 tensor whose ith row holds the
     coordinates of the ith boundary point. """
 
     assert((num_Boundary_Points % 4) == 0), "num_Boundary_Points must be a multiple of 4!"
 
-    # Generate colocation points.
-    Colocation_Points = torch.rand((num_Colocation_Points, 2));
+    # Generate collocation points.
+    Collocation_Points = torch.rand((num_Collocation_Points, 2));
 
     # We will generate boundary points for each of the four sides, as well as
     # the four corners. Therefore, each side will have num_Boundary_Points/4 - 1
@@ -177,7 +177,7 @@ def generate_points(num_Colocation_Points : int, num_Boundary_Points : int) -> T
                                  Boundary_Corners),
                                  dim = 0);
 
-    return (Colocation_Points, Boundary_Points);
+    return (Collocation_Points, Boundary_Points);
 
 
 
@@ -210,12 +210,12 @@ def main():
     # Pick an optimizer.
     Optimizer = torch.optim.Adam(u_NN.parameters(), lr = Learning_Rate);
 
-    # Set up training and training colocation/boundary points.
-    (Training_Coloc_Points, Training_Bound_Points) = generate_points(num_Colocation_Points = Num_Train_Coloc_Points, num_Boundary_Points = Num_Train_Bound_Points);
-    (Testing_Coloc_Points,  Testing_Bound_Points)  = generate_points(num_Colocation_Points = Num_Test_Coloc_Points, num_Boundary_Points = Num_Test_Bound_Points);
+    # Set up training and training collocation/boundary points.
+    (Training_Coloc_Points, Training_Bound_Points) = generate_points(num_Collocation_Points = Num_Train_Coloc_Points, num_Boundary_Points = Num_Train_Bound_Points);
+    (Testing_Coloc_Points,  Testing_Bound_Points)  = generate_points(num_Collocation_Points = Num_Test_Coloc_Points, num_Boundary_Points = Num_Test_Bound_Points);
 
     # Set up array to hold the testing losses.
-    Colocation_Losses = np.empty((Epochs), dtype = np.float);
+    Collocation_Losses = np.empty((Epochs), dtype = np.float);
     Boundary_Losses   = np.empty((Epochs), dtype = np.float);
 
     # Set up figure and Axes.
@@ -228,19 +228,19 @@ def main():
     for t in range(Epochs):
         # Run training, testing for this epoch. Log the losses
         Training_Loop(  u_NN,
-                        Colocation_Points = Training_Coloc_Points,
+                        Collocation_Points = Training_Coloc_Points,
                         Boundary_Points   = Training_Bound_Points,
                         Optimizer = Optimizer);
 
-        (Colocation_Losses[t], Boundary_Losses[t]) = Testing_Loop( u_NN,
-                                                                   Colocation_Points = Testing_Coloc_Points,
+        (Collocation_Losses[t], Boundary_Losses[t]) = Testing_Loop( u_NN,
+                                                                   Collocation_Points = Testing_Coloc_Points,
                                                                    Boundary_Points = Testing_Bound_Points );
 
         # Print losses.
         print(("Epoch #%d: " % t), end = '');
-        print(("Colocation Loss = %7f" % Colocation_Losses[t]), end = '');
+        print(("Collocation Loss = %7f" % Collocation_Losses[t]), end = '');
         print((", Boundary Loss = %7f" % Boundary_Losses[t]), end = '');
-        print((", Total Loss = %7f" % (Colocation_Losses[t] + Boundary_Losses[t])));
+        print((", Total Loss = %7f" % (Collocation_Losses[t] + Boundary_Losses[t])));
 
     # Plot final results.
     Update_Axes(fig, Axes, u_NN, Plotting_Points, 50);

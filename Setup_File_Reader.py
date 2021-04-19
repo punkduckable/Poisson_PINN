@@ -3,10 +3,10 @@ class Read_Error(Exception):
     pass;
 
 
+
 class Setup_Data_Container:
     # A container for data read in from the setup file.
     pass;
-
 
 
 
@@ -192,9 +192,9 @@ def Setup_File_Reader() -> Setup_Data_Container:
     ############################################################################
     # Testing/Trainign parameters
 
-    Setup_Data.Num_Train_Coloc_Points = int(Read_Line_After(File, "Number of Training Colocation Points [int] :").strip());
+    Setup_Data.Num_Train_Coloc_Points = int(Read_Line_After(File, "Number of Training Collocation Points [int] :").strip());
     Setup_Data.Num_Train_Bound_Points = int(Read_Line_After(File, "Number of Training Boundary Points [int] :").strip());
-    Setup_Data.Num_Test_Coloc_Points  = int(Read_Line_After(File, "Number of Testing Colocation Points [int] :").strip());
+    Setup_Data.Num_Test_Coloc_Points  = int(Read_Line_After(File, "Number of Testing Collocation Points [int] :").strip());
     Setup_Data.Num_Test_Bound_Points  = int(Read_Line_After(File, "Number of Testing Boundary Points [int] :").strip());
 
 
