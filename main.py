@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt;
 
 from Poisson_PINN import Neural_Network, f, Colocation_Loss, Boundary_Loss;
 from Plotter import Update_Axes, Generate_Plot_Gridpoints, Setup_Axes;
+from Setup_File_Reader import Setup_File_Reader, Setup_Data_Container;
 
 
 
@@ -182,22 +183,36 @@ def generate_points(num_Colocation_Points : int, num_Boundary_Points : int) -> T
 
 # main function!
 def main():
-    # Specify hyperparameters
-    Epochs : int = 100;
-    Learning_Rate : float = .001;
+    # Load setup data from the setup file.
+    Setup_Data = Setup_File_Reader();
+
+    # Test that we got the correct input.
+    print("Training PINN with the following parameters:")
+    for item in Setup_Data.__dict__.items():
+        print(item);
+
+    # Initialize Network hyperparameters.
+    Epochs : int = Setup_Data.Epochs;
+    Learning_Rate : float = Setup_Data.Learning_Rate;
+
+    # Initalize training parameters
+    Num_Train_Coloc_Points : int = Setup_Data.Num_Train_Coloc_Points;
+    Num_Train_Bound_Points : int = Setup_Data.Num_Train_Bound_Points;
+    Num_Test_Coloc_Points  : int = Setup_Data.Num_Test_Coloc_Points;
+    Num_Test_Bound_Points  : int = Setup_Data.Num_Test_Bound_Points;
 
     # Set up the neural network to approximate the PDE solution.
-    u_NN = Neural_Network(  num_hidden_layers = 5,
-                            nodes_per_layer = 20,
-                            input_dim = 2,
-                            output_dim = 1);
+    u_NN = Neural_Network(  Num_Hidden_Layers = Setup_Data.Num_Hidden_Layers,
+                            Nodes_Per_Layer = Setup_Data.Nodes_Per_Layer,
+                            Input_Dim = 2,
+                            Output_Dim = 1);
 
     # Pick an optimizer.
     Optimizer = torch.optim.Adam(u_NN.parameters(), lr = Learning_Rate);
 
     # Set up training and training colocation/boundary points.
-    Training_Colocation_Points, Training_Boundary_Points = generate_points(num_Colocation_Points = 500, num_Boundary_Points = 400);
-    Testing_Colocation_Points,  Testing_Boundary_Points  = generate_points(num_Colocation_Points = 100, num_Boundary_Points = 80);
+    (Training_Coloc_Points, Training_Bound_Points) = generate_points(num_Colocation_Points = Num_Train_Coloc_Points, num_Boundary_Points = Num_Train_Bound_Points);
+    (Testing_Coloc_Points,  Testing_Bound_Points)  = generate_points(num_Colocation_Points = Num_Test_Coloc_Points, num_Boundary_Points = Num_Test_Bound_Points);
 
     # Set up array to hold the testing losses.
     Colocation_Losses = np.empty((Epochs), dtype = np.float);
@@ -213,13 +228,13 @@ def main():
     for t in range(Epochs):
         # Run training, testing for this epoch. Log the losses
         Training_Loop(  u_NN,
-                        Colocation_Points = Training_Colocation_Points,
-                        Boundary_Points   = Training_Boundary_Points,
+                        Colocation_Points = Training_Coloc_Points,
+                        Boundary_Points   = Training_Bound_Points,
                         Optimizer = Optimizer);
 
         (Colocation_Losses[t], Boundary_Losses[t]) = Testing_Loop( u_NN,
-                                                                   Colocation_Points = Testing_Colocation_Points,
-                                                                   Boundary_Points = Testing_Boundary_Points );
+                                                                   Colocation_Points = Testing_Coloc_Points,
+                                                                   Boundary_Points = Testing_Bound_Points );
 
         # Print losses.
         print(("Epoch #%d: " % t), end = '');
@@ -232,7 +247,8 @@ def main():
     plt.show();
 
     # Save the network parameters!
-    torch.save(u_NN.state_dict(), "./Network_State_Dict");
+    if(Setup_Data.Save_To_File == True):
+        torch.save(u_NN.state_dict(), Setup_Data.Save_File_Name);
 
 
 
