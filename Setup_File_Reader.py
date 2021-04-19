@@ -149,19 +149,26 @@ def Setup_File_Reader() -> Setup_Data_Container:
     ############################################################################
     # Save/Load options.
 
-    # Load from File?
-    Buffer = Read_Line_After(File, "Load Network State Dict [Bool] :").strip();
+    # Load network state from File?
+    Buffer = Read_Line_After(File, "Load Network State [Bool] :").strip();
     if(Buffer[0] == 'T' or Buffer[0] == 't'):
-        Setup_Data.Load_From_File = True;
+        Setup_Data.Load_Network_State = True;
     else:
-        Setup_Data.Load_From_File = False;
+        Setup_Data.Load_Network_State = False;
 
-    # If we are loading from file, get load file name.
-    if(Setup_Data.Load_From_File == True):
+    # Load optimizer state from file?
+    Buffer = Read_Line_After(File, "Load Optimizer State [Bool] :").strip();
+    if(Buffer[0] == 'T' or Buffer[0] == 't'):
+        Setup_Data.Load_Optimize_State = True;
+    else:
+        Setup_Data.Load_Optimize_State = False;
+
+    # If we are loading anything, get load file name.
+    if(Setup_Data.Load_Network_State == True or Setup_Data.Load_Optimize_State == True):
         Setup_Data.Load_File_Name = Read_Line_After(File, "Load File Name [str] :").strip();
 
     # Save to file?
-    Buffer = Read_Line_After(File, "Save Network State Dict [Bool] :").strip();
+    Buffer = Read_Line_After(File, "Save State [Bool] :").strip();
     if(Buffer[0] == 'T' or Buffer[0] == 't'):
         Setup_Data.Save_To_File = True;
     else:

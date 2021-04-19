@@ -210,6 +210,23 @@ def main():
     # Pick an optimizer.
     Optimizer = torch.optim.Adam(u_NN.parameters(), lr = Learning_Rate);
 
+    # If we're loading from file, load in the store network's parameters.
+    if(Setup_Data.Load_Network_State == True or Setup_Data.Load_Optimize_State == True):
+        # Load the saved checkpoint.
+        Checkpoint = torch.load(Setup_Data.Load_File_Name);
+
+        if(Setup_Data.Load_Network_State == True):
+            u_NN.load_state_dict(Checkpoint["Network_State"]);
+            u_NN.train();
+
+        # Note that this will overwrite the specified Learning Rate using the
+        # Learning rate in the saved state. Thus, if this is set to true, then
+        # we essentially ignore the learning rate in the setup file.
+        if(Setup_Data.Load_Optimize_State == True):
+            Optimizer.load_state_dict(Checkpoint["Optimizer_State"]);
+            print(Optimizer);
+
+
     # Set up training and training collocation/boundary points.
     (Training_Coloc_Points, Training_Bound_Points) = generate_points(num_Collocation_Points = Num_Train_Coloc_Points, num_Boundary_Points = Num_Train_Bound_Points);
     (Testing_Coloc_Points,  Testing_Bound_Points)  = generate_points(num_Collocation_Points = Num_Test_Coloc_Points, num_Boundary_Points = Num_Test_Bound_Points);
@@ -237,19 +254,20 @@ def main():
                                                                    Boundary_Points = Testing_Bound_Points );
 
         # Print losses.
-        print(("Epoch #%d: " % t), end = '');
-        print(("Collocation Loss = %7f" % Collocation_Losses[t]), end = '');
-        print((", Boundary Loss = %7f" % Boundary_Losses[t]), end = '');
-        print((", Total Loss = %7f" % (Collocation_Losses[t] + Boundary_Losses[t])));
+        print(("Epoch #%-4d: " % t), end = '');
+        print(("\tCollocation Loss = %7f" % Collocation_Losses[t]), end = '');
+        print((",\t Boundary Loss = %7f" % Boundary_Losses[t]), end = '');
+        print((",\t Total Loss = %7f" % (Collocation_Losses[t] + Boundary_Losses[t])));
+
+    # Save the network and optimizer states!
+    if(Setup_Data.Save_To_File == True):
+        torch.save({"Network_State" : u_NN.state_dict(),
+                    "Optimizer_State" : Optimizer.state_dict()},
+                    Setup_Data.Save_File_Name);
 
     # Plot final results.
     Update_Axes(fig, Axes, u_NN, Plotting_Points, 50);
     plt.show();
-
-    # Save the network parameters!
-    if(Setup_Data.Save_To_File == True):
-        torch.save(u_NN.state_dict(), Setup_Data.Save_File_Name);
-
 
 
 if __name__ == '__main__':

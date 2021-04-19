@@ -12,18 +12,22 @@
 # free to add in blank lines/comments as you see fit, as they will not break the
 # reader.
 #
-# The two "File Name" settings should not include file type extensions. The code
-# will add them automatically.
+# If you plan to load the network state, then the network Architecture settings
+# must be identical to those of the saved network. (same number of layers and
+# nodes per layer). Likewise, if you plan to load the optimizer state, then you
+# must use the same optimizer as the staved state. Further, if we Load the
+# Optimizer state, then Learning Rate hyper-parameters will be ignored.
 
 
 
 ################################################################################
 # Save/Load parameters
 
-Load Network State Dict [Bool] :                 False
-  Load File Name [str] :                         Load_Example
-Save Network State Dict [Bool] :                 True
-  Save File Name [str] :                         Save_Example
+Load Network State [Bool] :                      True
+Load Optimizer State [Bool] :                    True
+  Load File Name [str] :                         Test_Save3
+Save State [Bool] :                              True
+  Save File Name [str] :                         Test_Save3
 
 
 
@@ -38,15 +42,15 @@ Nodes per Hidden Layer [int] :                   20
 ################################################################################
 # Network hyper-parameters
 
-Number of Epochs [int] :                         100
-Learning Rate [float] :                          .001
+Number of Epochs [int] :                         200
+Learning Rate [float] :                          .0015
 
 
 
 ################################################################################
 # Training, Testing parameters
 
-Number of Training Collocation Points [int] :     500
+Number of Training Collocation Points [int] :    500
 Number of Training Boundary Points [int] :       400
-Number of Testing Collocation Points [int] :      100
+Number of Testing Collocation Points [int] :     100
 Number of Testing Boundary Points [int] :        80
