@@ -1,0 +1,52 @@
+# Instructions:
+# This file controls the setup of the program. The file consists of comment
+#(lines that begin with '#') and setting lines. Each setting line consists of
+# a setting name, a data type, and a value. They use the following format:
+#         <Setting Name> [<data type>] : <value>
+# <value>'s data type must match <data type>. You can place any number of spaces
+# between the colon and <value> (the spacing doesn't matter, so long as
+# the setting is all on one line). Nothing can appear after <value> on a setting
+# line. You CAN NOT reorder the setting lines.
+#
+# The reader will ignore all blank lines, as well as any comment lines. Feel
+# free to add in blank lines/comments as you see fit, as they will not break the
+# reader.
+#
+# The two "File Name" settings should not include file type extensions. The code
+# will add them automatically.
+
+
+
+################################################################################
+# Save/Load parameters
+
+Load Network State Dict [Bool] :                 False
+  Load File Name [str] :                         Load_Example
+Save Network State Dict [Bool] :                 True
+  Save File Name [str] :                         Save_Example
+
+
+
+################################################################################
+# Network Architecture
+
+Number of Hidden Layers [int] :                  5
+Nodes per Hidden Layer [int] :                   20
+
+
+
+################################################################################
+# Network hyper-parameters
+
+Number of Epochs [int] :                         100
+Learning Rate [float] :                          .001
+
+
+
+################################################################################
+# Training, Testing parameters
+
+Number of Training Colocation Points [int] :     500
+Number of Training Boundary Points [int] :       400
+Number of Testing Colocation Points [int] :      100
+Number of Testing Boundary Points [int] :        80
