@@ -20,7 +20,7 @@ def Training_Loop(  u_NN : Neural_Network,
 
     ----------------------------------------------------------------------------
     Arguments:
-    net : The neural network that is approximating the solution to the PDE.
+    u_NN : The neural network that is approximating the solution to the PDE.
 
     Collocation_Points : the collocation points at which we want to enforce the
     PDE. These should be on the interior of the domain. Futher, these should be
@@ -63,7 +63,7 @@ def Testing_Loop(   u_NN : Neural_Network,
                     Collocation_Points : torch.Tensor,
                     Boundary_Points : torch.Tensor) -> Tuple[float, float]:
     """ This loop tests the neural network at the specified Boundary and
-    Collocation points. You CAN NOT run this funcetion with no_grad set True.
+    Collocation points. You CAN NOT run this function with no_grad set True.
     Why? Because we need to evaluate derivatives of the solution with respect
     to the inputs! This is a PINN, afterall. This means that we need torch to
     build a computa1tional graph.
@@ -76,7 +76,7 @@ def Testing_Loop(   u_NN : Neural_Network,
 
     ----------------------------------------------------------------------------
     Arguments:
-    net : The neural network that is approximating the solution to the PDE.
+    u_NN : The neural network that approximates the PDE solution.
 
     Collocation_Points : the collocation points at which we want to enforce the
     PDE. These should be on the interior of the domain. Futher, these should be
@@ -224,8 +224,6 @@ def main():
         # we essentially ignore the learning rate in the setup file.
         if(Setup_Data.Load_Optimize_State == True):
             Optimizer.load_state_dict(Checkpoint["Optimizer_State"]);
-            print(Optimizer);
-
 
     # Set up training and training collocation/boundary points.
     (Training_Coloc_Points, Training_Bound_Points) = generate_points(num_Collocation_Points = Num_Train_Coloc_Points, num_Boundary_Points = Num_Train_Bound_Points);
@@ -250,8 +248,8 @@ def main():
                         Optimizer = Optimizer);
 
         (Collocation_Losses[t], Boundary_Losses[t]) = Testing_Loop( u_NN,
-                                                                   Collocation_Points = Testing_Coloc_Points,
-                                                                   Boundary_Points = Testing_Bound_Points );
+                                                                    Collocation_Points = Testing_Coloc_Points,
+                                                                    Boundary_Points = Testing_Bound_Points );
 
         # Print losses.
         print(("Epoch #%-4d: " % t), end = '');
