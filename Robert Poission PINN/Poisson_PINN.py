@@ -23,7 +23,7 @@ class Neural_Network(torch.nn.Module):
         # Define object attributes. Note that there is an optput layer in
         # addition to the hidden layers (which is why Num_Layers is
         # Num_Hidden_Layers + 1)
-        self.Input_Dim : int  = Input_Dim;
+        self.Input_Dim  : int = Input_Dim;
         self.Output_Dim : int = Output_Dim;
         self.Num_Layers : int = Num_Hidden_Layers + 1;
 
@@ -161,7 +161,7 @@ def Collocation_Loss(u_NN : Neural_Network, Collocation_Points : torch.Tensor) -
         d2u_dx2 = grad_du_dx[0];
         d2u_dy2 = grad_du_dy[1];
 
-        # Now evaluate how well the network satisifies the PDE at this point. 
+        # Now evaluate how well the network satisifies the PDE at this point.
         Loss += (d2u_dx2 + d2u_dy2 + f(xy[0], xy[1])) ** 2;
 
     # Divide the accmulated loss by the number of collocation points to get

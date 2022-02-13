@@ -10,10 +10,10 @@ from Setup_File_Reader import Setup_File_Reader, Setup_Data_Container;
 
 
 # Training Loop
-def Training_Loop(  u_NN : Neural_Network,
-                    Collocation_Points : torch.Tensor,
-                    Boundary_Points : torch.Tensor,
-                    Optimizer : torch.optim.Optimizer) -> None:
+def Training_Loop(  u_NN                : Neural_Network,
+                    Collocation_Points  : torch.Tensor,
+                    Boundary_Points     : torch.Tensor,
+                    Optimizer           : torch.optim.Optimizer) -> None:
     """ This loop runs one epoch of training for the neural network. In
     particular, we enforce the PDE at the specified Collocation_Points, and the
     boundary conditions at the Boundary_Points.
@@ -40,7 +40,7 @@ def Training_Loop(  u_NN : Neural_Network,
     Nothing! """
 
     num_Collocation_Points : int = Collocation_Points.shape[0];
-    num_Boundary_Points : int   = Boundary_Points.shape[0];
+    num_Boundary_Points    : int = Boundary_Points.shape[0];
 
     # Zero out the gradients in the neural network.
     Optimizer.zero_grad();
@@ -59,9 +59,9 @@ def Training_Loop(  u_NN : Neural_Network,
 
 
 # Testing Loop
-def Testing_Loop(   u_NN : Neural_Network,
-                    Collocation_Points : torch.Tensor,
-                    Boundary_Points : torch.Tensor) -> Tuple[float, float]:
+def Testing_Loop(   u_NN                : Neural_Network,
+                    Collocation_Points  : torch.Tensor,
+                    Boundary_Points     : torch.Tensor) -> Tuple[float, float]:
     """ This loop tests the neural network at the specified Boundary and
     Collocation points. You CAN NOT run this function with no_grad set True.
     Why? Because we need to evaluate derivatives of the solution with respect
@@ -202,10 +202,10 @@ def main():
     Num_Test_Bound_Points  : int = Setup_Data.Num_Test_Bound_Points;
 
     # Set up the neural network to approximate the PDE solution.
-    u_NN = Neural_Network(  Num_Hidden_Layers = Setup_Data.Num_Hidden_Layers,
-                            Nodes_Per_Layer = Setup_Data.Nodes_Per_Layer,
-                            Input_Dim = 2,
-                            Output_Dim = 1);
+    u_NN = Neural_Network(  Num_Hidden_Layers   = Setup_Data.Num_Hidden_Layers,
+                            Nodes_Per_Layer     = Setup_Data.Nodes_Per_Layer,
+                            Input_Dim           = 2,
+                            Output_Dim          = 1);
 
     # Pick an optimizer.
     Optimizer = torch.optim.Adam(u_NN.parameters(), lr = Learning_Rate);
@@ -225,13 +225,13 @@ def main():
         if(Setup_Data.Load_Optimize_State == True):
             Optimizer.load_state_dict(Checkpoint["Optimizer_State"]);
 
-    # Set up training and training collocation/boundary points.
+    # Set up testing and training collocation/boundary points.
     (Training_Coloc_Points, Training_Bound_Points) = generate_points(num_Collocation_Points = Num_Train_Coloc_Points, num_Boundary_Points = Num_Train_Bound_Points);
     (Testing_Coloc_Points,  Testing_Bound_Points)  = generate_points(num_Collocation_Points = Num_Test_Coloc_Points, num_Boundary_Points = Num_Test_Bound_Points);
 
     # Set up array to hold the testing losses.
     Collocation_Losses = np.empty((Epochs), dtype = np.float);
-    Boundary_Losses   = np.empty((Epochs), dtype = np.float);
+    Boundary_Losses    = np.empty((Epochs), dtype = np.float);
 
     # Set up figure and Axes.
     fig, Axes = Setup_Axes();
