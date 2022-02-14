@@ -22,7 +22,7 @@ def Train(  U           : Network,
     # Next, zero out the gradients.
     Optim.zero_grad();
 
-    # Now, run backpropigation.
+    # Now, run back-propigation.
     Loss.backward();
 
     # Finally, update the network parameters.

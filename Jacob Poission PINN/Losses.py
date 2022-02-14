@@ -35,10 +35,14 @@ def BC_Loss(U           : Network,
     # The result is an N by 1 tensor. We want an N element tensor. To do this,
     # we view it as a 1d tensor. To do this, we use the view method (which can
     # change the shape of a tensor without changing its contents).
-    U_BC            : torch.Tensor = U(BC_Coords).view(-1)
+    U_BC            : torch.Tensor = U(BC_Coords).view(-1);
 
     # Now, evaluate the square difference between U_BC and BC_Targets.
     Square_Errors   : torch.Tensor = torch.mul(torch.sub(U_BC, BC_Targets), torch.sub(U_BC, BC_Targets));
+
+    # This is equivalent to the following:
+    #       Square_Errors = (U_BC - BC_Targets)*(U_BC - BC_Targets).
+    # the former may run a bit faster. 
 
     # Return the mean square error!
     return torch.mean(Square_Errors);
