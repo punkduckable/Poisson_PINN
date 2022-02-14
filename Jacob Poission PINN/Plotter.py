@@ -71,26 +71,21 @@ def Setup_Axes() -> Tuple[plt.figure, numpy.array]:
     # Approx solution subplot.
     Axes1 = fig.add_subplot(1, 2, 1);
     Axes1.set_title("Neural Network Approximation");
+    Axes1.set_xlabel("x (m)");
+    Axes1.set_ylabel("y (m)");
+    Axes1.set_aspect('equal', adjustable = 'datalim');
+    Axes1.set_box_aspect(1.);
 
     # Residual subplot.
     Axes2 = fig.add_subplot(1, 2, 2);
     Axes2.set_title("PDE Residual");
+    Axes2.set_xlabel("x (m)");
+    Axes2.set_ylabel("y (m)");
+    Axes2.set_aspect('equal', adjustable = 'datalim');
+    Axes2.set_box_aspect(1.);
 
     # Package axes objects into an array.
     Axes = numpy.array([Axes1, Axes2]);
-
-    # Set settings that are the same for each Axes object.
-    # The domain of each Axes object is the unit (2) square, and it's aspect
-    # ratio should be equal. I set these parameters in a loop so that I only
-    # have to type them once, thereby improving code maintainability.
-    for i in range(2):
-        # Set x, y bounds
-        Axes[i].set_xbound(0., 1.);
-        Axes[i].set_ybound(0., 1.);
-
-        # Force python to produce a square plot.
-        Axes[i].set_aspect('equal', adjustable = 'datalim');
-        Axes[i].set_box_aspect(1.);
 
     return (fig, Axes);
 

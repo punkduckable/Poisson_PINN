@@ -30,8 +30,12 @@ def BC_Loss(U           : Network,
     A scalar (one-element) tensor whose lone entry holds the mean square error
     between U evaluated at the BC_Coords, and the target values at those coords. """
 
-    # First, evaluate U at the coordinates.
-    U_BC            : torch.Tensor = U(BC_Coords).view(-1);
+    # First, evaluate U at the coordinates. When you pass an N by 2 tensor
+    # through a network that maps from R^2 to R, the output is an N by 1 matrix.
+    # The result is an N by 1 tensor. We want an N element tensor. To do this,
+    # we view it as a 1d tensor. To do this, we use the view method (which can
+    # change the shape of a tensor without changing its contents).
+    U_BC            : torch.Tensor = U(BC_Coords).view(-1)
 
     # Now, evaluate the square difference between U_BC and BC_Targets.
     Square_Errors   : torch.Tensor = torch.mul(torch.sub(U_BC, BC_Targets), torch.sub(U_BC, BC_Targets));
