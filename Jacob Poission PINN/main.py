@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt;
 num_hidden_layers       : int   = 5;
 units_per_layer         : int   = 20;
 
-lr                      : float = 0.0025;
+lr                      : float = 0.01;
 num_epochs              : int   = 2500;
 
 Num_Train_Coll_Coords   : int   = 2000;
@@ -66,6 +66,16 @@ def main():
     # obtain an itterator over a module's paramater attributes via the
     # "paramaters" method.
     Optim = torch.optim.Adam(params = U.parameters(), lr = lr);
+
+    # Next, set up a learning rate scheduler. This will gradually decrease the
+    # learning rate as the number of epochs increases. This allows us to begin
+    # with a fairly large learning rate, thereby quickly approaching a minima,
+    # but end with a small one (which is generally necessary for getting very
+    # very close to the minima). This particular scheduler multiplies the
+    # previous learning rate by gamma every step_size epochs.
+    Scheduler = torch.optim.lr_scheduler.StepLR(optimizer   = Optim,
+                                                step_size   = 150,
+                                                gamma       = .9);
 
     # Generate the Collocation coordinates.
     Train_Coll_Coords : torch.Tensor = Generate_Coords(
@@ -124,6 +134,9 @@ def main():
                 Coll_Coords = Test_Coll_Coords,
                 BC_Coords   = Test_BC_Coords,
                 BC_Targets  = Test_BC_Targets);
+
+        # Finally, setp the scheduler.
+        Scheduler.step();
 
 
 
